@@ -9,5 +9,5 @@ setup(
 	url = "https://github.com/xfanzone/pyecoin",
 	download_url = "https://github.com/xfanzone/pyecoin/tarball/0.1",
 	packages=['pyecoin',],
-	keyworks = ['btc', 'ltc', 'btctrade', 'jubi', 'trading']
+	keywords = ['btc', 'ltc', 'btctrade', 'jubi', 'trading']
 	)
