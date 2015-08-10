@@ -17,8 +17,9 @@ logger.addHandler(ch)
 
 class MarketCondition:
 
-	def __init__(self, market = "btctrade", coin = "ltc", coin2 = None):
-		logger.info('initilize. market: %s, coin type: %s', market, coin)
+	def __init__(self, market = "btctrade", coin = "ltc", coin2 = None, logging = False):
+		if logging:
+			logger.info('initilize. market: %s, coin type: %s', market, coin)
 		if market not in support_market:
 			raise Exception("Unknown market. Report to xfanzone@gmail.com to add support.")
 		self._market = market
@@ -30,10 +31,12 @@ class MarketCondition:
 			self._base_url = "https://btc-e.com/api/3"
 		self._coin = coin
 		if market != "btc-e" and coin2 is not None:
-			logger.warning("does not support set pair")
+			if logging:
+				logger.warning("does not support set pair")
 			coins = None
 		self._coin2 = coin2
 		self._adjust_pair()
+		self._logging = logging
 
 	@property 
 	def coin(self):
@@ -41,7 +44,8 @@ class MarketCondition:
 
 	@coin.setter
 	def coin(self, value):
-		logger.info('coin type set to %s', value)
+		if self._logging:
+			logger.info('coin type set to %s', value)
 		self._coin = value
 		self._adjust_pair()
 
@@ -51,7 +55,8 @@ class MarketCondition:
 
 	@coin2.setter
 	def coin2(self, value):
-		logger.info('coin2 type set to %s', value)
+		if self._logging:
+			logger.info('coin2 type set to %s', value)
 		self._coin2 = value
 		self._adjust_pair()
 
@@ -60,7 +65,8 @@ class MarketCondition:
 		#url construction
 		url = self._get_request_url('ticker')
 		#make the request
-		logger.info('request for %s', url)
+		if self._logging:
+			logger.info('request for %s', url)
 		r = requests.get(url, headers = headers)
 		#check http status
 		if r.status_code != 200:
@@ -79,7 +85,8 @@ class MarketCondition:
 
 	def get_depth(self):
 		url = self._get_request_url('depth')
-		logger.info('request for %s', url)
+		if self._logging:
+			logger.info('request for %s', url)
 		r = requests.get(url, headers = headers)
 		if r.status_code != 200:
 			raise ServerError(r.status_code)	
@@ -100,7 +107,8 @@ class MarketCondition:
 
 	def get_trades(self):
 		url = self._get_request_url('trades')
-		logger.info('request for %s', url)
+		if self._logging:
+			logger.info('request for %s', url)
 		r = requests.get(url, headers = headers)
 		if r.status_code != 200:
 			raise ServerError(r.status_code)	

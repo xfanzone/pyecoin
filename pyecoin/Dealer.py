@@ -36,8 +36,9 @@ class DealerConst():
 
 class Dealer():
 
-	def __init__(self, market = "btctrade", coin = "ltc", public_key = None, secret_key = None):
-		logger.info('initilize. market: %s, coin type: %s', market, coin)
+	def __init__(self, market = "btctrade", coin = "ltc", public_key = None, secret_key = None, logging = False):
+		if logging:
+			logger.info('initilize. market: %s, coin type: %s', market, coin)
 		if market not in ("btctrade", "jubi"):
 			raise Exception("Unknown market. Report to xfanzone@gmail.com to add support.")
 		self._market = market
@@ -51,9 +52,10 @@ class Dealer():
 			self._hash_key = hashlib.md5(secret_key).hexdigest()
 		else:
 			self._hash_key = None
+		self._logging = logging
 
 	def get_balance(self):
-		self.url = self._get_request_url('balance')
+		self._url = self._get_request_url('balance')
 		self._get_basic_payload()
 		self._post_signatured_payload()
 		resp = self.resp.json()
@@ -67,11 +69,12 @@ class Dealer():
 		return resp
 
 	def get_orders(self, order_type = "open", since = None):
-		self.url = self._get_request_url('orders')
+		self._url = self._get_request_url('orders')
 		self._get_basic_payload()
 		self._set_coin()
 		if self._market == "btctrade" and since is not None:
-			logger.warning("btctrade does not support `since' keyword, omitting")
+			if self._logging:
+				logger.warning("btctrade does not support `since' keyword, omitting")
 			since = None
 		if since is not None:
 			self._set_get_order_since(since)
@@ -84,7 +87,7 @@ class Dealer():
 		return resp
 
 	def fetch_order(self, orderId):
-		self.url = self._get_request_url('fetch_order')
+		self._url = self._get_request_url('fetch_order')
 		self._get_basic_payload()
 		self._set_orderId(orderId)
 		self._post_signatured_payload()
@@ -95,19 +98,20 @@ class Dealer():
 		return resp
 
 	def cancel_order(self, orderId):
-		self.url = self._get_request_url('cancel_order')
+		self._url = self._get_request_url('cancel_order')
 		self._get_basic_payload()
 		self._set_orderId(orderId)
 		self._post_signatured_payload()
 		resp = self.resp.json()
-		logger.debug("cancel order: %s", resp.__str__())
+		if self._logging:
+			logger.debug("cancel order: %s", resp.__str__())
 		if self._speed_issue(resp):
 			time.sleep(2)
 			return self.cancel_order(orderId)
 		return resp
 
 	def buy(self, price, amount):
-		self.url = self._get_request_url('buy')
+		self._url = self._get_request_url('buy')
 		self._get_basic_payload()
 		self._set_coin()
 		self._set_amount(amount)
@@ -122,7 +126,7 @@ class Dealer():
 		return resp
 
 	def sell(self, price, amount):
-		self.url = self._get_request_url('sell')
+		self._url = self._get_request_url('sell')
 		self._get_basic_payload()
 		self._set_coin()
 		self._set_amount(amount)
@@ -174,8 +178,9 @@ class Dealer():
 
 	def _post_data(self):
 		http_param = self._build_http_param()
-		logger.info("request for %s with data: %s", self.url, http_param)
-		self.resp = requests.post(self.url, http_param, headers = headers)
+		if self.logging:
+			logger.info("request for %s with data: %s", self._url, http_param)
+		self.resp = requests.post(self._url, http_param, headers = headers)
 
 	def _set_orderId(self, orderId):
 		self.payload[DealerConst.ID] = orderId
