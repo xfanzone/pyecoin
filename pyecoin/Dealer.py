@@ -35,6 +35,13 @@ class DealerConst():
 	SINCE = "since"
 
 class Dealer():
+	"""
+	Class used to do transactions on particular markets. By now 2 markets have been supported, namely btctrade.com and jubi.com
+	usage example:
+	d = Dealer(market = "btctrade", coin = "ltc", public_key = "{your publib key}", secret_key = "{you secret key}", logging = True)
+	d.get_balance()
+	d.buy(price = 1.0, amount = 1.0)
+	"""
 
 	def __init__(self, market = "btctrade", coin = "ltc", public_key = None, secret_key = None, logging = False):
 		if logging:
@@ -55,6 +62,9 @@ class Dealer():
 		self._logging = logging
 
 	def get_balance(self):
+		"""
+		get current balance
+		"""
 		self._url = self._get_request_url('balance')
 		self._get_basic_payload()
 		self._post_signatured_payload()
@@ -69,6 +79,9 @@ class Dealer():
 		return resp
 
 	def get_orders(self, order_type = "open", since = None):
+		"""
+		get orders issued by yourself
+		"""
 		self._url = self._get_request_url('orders')
 		self._get_basic_payload()
 		self._set_coin()
@@ -87,6 +100,9 @@ class Dealer():
 		return resp
 
 	def fetch_order(self, orderId):
+		"""
+		fetch order information by order id
+		"""
 		self._url = self._get_request_url('fetch_order')
 		self._get_basic_payload()
 		self._set_orderId(orderId)
@@ -98,6 +114,9 @@ class Dealer():
 		return resp
 
 	def cancel_order(self, orderId):
+		"""
+		cancel order by order id
+		"""
 		self._url = self._get_request_url('cancel_order')
 		self._get_basic_payload()
 		self._set_orderId(orderId)
@@ -111,6 +130,9 @@ class Dealer():
 		return resp
 
 	def buy(self, price, amount):
+		"""
+		buy `amount' coin at `price'
+		"""
 		self._url = self._get_request_url('buy')
 		self._get_basic_payload()
 		self._set_coin()
@@ -126,6 +148,9 @@ class Dealer():
 		return resp
 
 	def sell(self, price, amount):
+		"""
+		sell `amount' coin at `price'
+		"""
 		self._url = self._get_request_url('sell')
 		self._get_basic_payload()
 		self._set_coin()
@@ -203,15 +228,19 @@ class Dealer():
 	def _set_trade_type(self, trade_type):
 		self.payload[DealerConst.TYPE] = trade_type
 
-	#TODO: return a float between 0 and 1
 	def is_buy_done(self, orderId):
+		"""
+		return a float between 0 and 1, indicating the percentage that is done of the order 
+		"""
 		resp = self.fetch_order(orderId)
 		amount_original = float(resp[DealerConst.AMOUNT_ORIGINAL])
 		amount_outstanding = float(resp[DealerConst.AMOUNT_OUTSTANDING])
 		return 1 - amount_outstanding / amount_original
 
-	#TODO: return a float between 0 and 1
 	def is_sell_done(self, orderId):
+		"""
+		return a float between 0 and 1, indicating the percentage that is done of the order 
+		"""
 		resp = self.fetch_order(orderId)
 		if self._speed_issue(resp):
 			return self.is_sell_done(orderId)

@@ -16,6 +16,12 @@ logger.addHandler(ch)
 
 
 class MarketCondition:
+	"""
+	Class used to get market information. By now 3 markets have been supported, namely btctrade.com, jubi.com, and btc-e.com
+	usage example:
+	m = MarketCondition(market = "btctrade", coin = "ltc", logging = True)
+	print m.get_depth()
+	"""
 
 	def __init__(self, market = "btctrade", coin = "ltc", coin2 = None, logging = False):
 		if logging:
@@ -62,6 +68,9 @@ class MarketCondition:
 
 
 	def get_ticker(self):
+		"""
+		get ticker for particular market 
+		"""
 		#url construction
 		url = self._get_request_url('ticker')
 		#make the request
@@ -84,6 +93,9 @@ class MarketCondition:
 
 
 	def get_depth(self):
+		"""
+		get depth for particular market
+		"""
 		url = self._get_request_url('depth')
 		if self._logging:
 			logger.info('request for %s', url)
@@ -106,6 +118,9 @@ class MarketCondition:
 
 
 	def get_trades(self):
+		"""
+		get trades over past time for particular market
+		"""
 		url = self._get_request_url('trades')
 		if self._logging:
 			logger.info('request for %s', url)
